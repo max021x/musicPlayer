@@ -39,8 +39,6 @@ class Music(CTk):
     self.brows_bnt.configure(command=self.openfile)
     self.play_btn.configure(command= lambda : self.int_var.set(1))
     self.stop_btn.configure(command=self.pause_)
-    self.next_btn.configure(command = lambda : self.next_var.set(True))
-    self.last_bnt.configure(command=lambda : self.last_var.set(True))
   def openfile(self):
     self.path = filedialog.askopenfilename(initialdir=r'D:\fun\musics',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
     self.th = threading.Thread(target=self.play_music)
@@ -48,6 +46,8 @@ class Music(CTk):
     
   def play_music(self):
     self.play_btn.wait_variable(self.int_var)
+    self.next_btn.configure(command = lambda : self.next_var.set(True))
+    self.last_bnt.configure(command=lambda : self.last_var.set(True))
     curent_mp3 = 0
     while True:
         pointer = 0 
@@ -62,12 +62,11 @@ class Music(CTk):
 
               if self.flag == True:
                 mixer.music.unpause()           
-              # next music
 
               if self.last_var.get():
                 self.last_var.set(False)
                 pointer = pointer-1
-                if pointer<len(self.path): 
+                if pointer<=-len(self.path): 
                   pointer = 0
                 curent_mp3 = pointer
                 mixer.music.load(self.path[pointer])
