@@ -2,40 +2,49 @@ import threading
 from time import sleep
 from pygame import mixer
 from typing import Tuple
-from customtkinter import *
+import ttkbootstrap as tb
 from tkinter import filedialog
-set_default_color_theme('dark-blue')
 mixer.init()
-class Music(CTk):
-  def __init__(self,fg_color: str | Tuple[str, str] | None = None, **kwargs):
-    super().__init__(fg_color, **kwargs)
+class Music(tb.Window):
+  def __init__(self):
+    super().__init__(themename='vapor')
     self.geometry('400x250')
     self.resizable(False , False)
     self.title('boombBox')
     self.iconbitmap(r'icons\boombbox.ico')
     self.mp3()
     self.flag = True
+  
   def mp3(self):
-    self.main_frame = CTkFrame(self)
+    self.main_frame = tb.Frame(self)
     self.main_frame.pack(expand=True , fill='both')
     self.main_frame.columnconfigure((0,1,2,3,4) , weight=1 , uniform='a')
     self.main_frame.rowconfigure((0,1,2,3,4,5) , weight=1 , uniform='a')
 
-    self.play_btn = CTkButton(self.main_frame , text='Play')
-    self.next_btn = CTkButton(self.main_frame , text='Next')
-    self.last_bnt = CTkButton(self.main_frame , text='Last')
-    self.brows_bnt = CTkButton(self.main_frame, text='📁' , font=('arial',20),width=15)
-    self.stop_btn = CTkButton(self.main_frame , text='Stop')
-    
-    self.brows_bnt.grid(row=4, column=0,sticky='e')
-    self.play_btn.grid(row=5 ,column=2 , padx=10)
-    self.next_btn.grid(row=5 ,column=3 , columnspan=2)
-    self.last_bnt.grid(row=5 ,column=0 , columnspan=2)
-    self.stop_btn.grid(row=4 , column=2)
+    self.lbl = tb.Label(self.main_frame ,width=100)
+    self.lbl.grid(row=0 ,column=0 , columnspan = 4)
 
-    self.int_var = IntVar()
-    self.next_var = BooleanVar()
-    self.last_var = BooleanVar()
+    self.volume = tb.Scale(self.main_frame , from_=0 , to=100)
+    self.volume.grid(row=4 , column=3 ,sticky='ewns' ,padx=5)
+    self.volume.set(50)
+    mixer.music.set_volume(0.5)
+    self.volume.configure(command=self.music_volume)
+
+    self.play_btn  = tb.Button(self.main_frame , text='Play')
+    self.next_btn  = tb.Button(self.main_frame , text='Next')
+    self.last_bnt  = tb.Button(self.main_frame , text='Last')
+    self.brows_bnt = tb.Button(self.main_frame, text='📁')
+    self.stop_btn  = tb.Button(self.main_frame , text='||')
+    
+    self.brows_bnt.grid(row=4 , column=0)
+    self.last_bnt.grid(row=5 , column=0 ,sticky='ew')
+    self.stop_btn.grid(row=5 , column=1 , columnspan=2 , sticky='ew' ,padx=10)
+    self.next_btn.grid(row=5 , column=3 , sticky='ew')
+
+
+    self.int_var =  tb.IntVar()
+    self.next_var = tb.BooleanVar()
+    self.last_var = tb.BooleanVar()
     self.brows_bnt.configure(command=self.openfile)
     self.play_btn.configure(command= lambda : self.int_var.set(1))
     self.stop_btn.configure(command=self.pause_)
@@ -45,9 +54,9 @@ class Music(CTk):
     self.th.start()
     
   def play_music(self):
-    self.play_btn.wait_variable(self.int_var)
     self.next_btn.configure(command = lambda : self.next_var.set(True))
     self.last_bnt.configure(command=lambda : self.last_var.set(True))
+    self.flag = True
     while True:
         curent_mp3 = 0
         pointer = 0 
@@ -60,7 +69,8 @@ class Music(CTk):
           pointer = curent_mp3
           mixer.music.load(self.path[pointer])
           mixer.music.play()
-          print(pointer)
+          music_name = self.path[pointer].split('/')
+          self.lbl.configure(text =f'{music_name[-1]}')
           while mixer.music.get_busy():
               sleep(1)
               while self.flag == False:
@@ -77,7 +87,8 @@ class Music(CTk):
                 curent_mp3 = pointer
                 mixer.music.load(self.path[pointer])
                 mixer.music.play()
-                print(pointer)
+                music_name = self.path[pointer].split('/')
+                self.lbl.configure(text =f'{music_name[-1]}')
 
               if self.next_var.get():
                 self.next_var.set(False)
@@ -87,7 +98,8 @@ class Music(CTk):
                 curent_mp3 = pointer
                 mixer.music.load(self.path[pointer])
                 mixer.music.play()
-                print(pointer)
+                music_name = self.path[pointer].split('/')
+                self.lbl.configure(text =f'{music_name[-1]}')
               
 
               if mixer.music.get_busy() == False :
@@ -98,9 +110,14 @@ class Music(CTk):
   def pause_(self):
     if self.flag:
       self.flag = False
+      self.stop_btn.configure(text='\\>')
     else:
       self.flag = True
-  
+      self.stop_btn.configure(text='||')
+
+  def music_volume(self , e):
+    volume = self.volume.get() / 100
+    mixer.music.set_volume(volume)
 
 Music().mainloop()
 
