@@ -48,10 +48,16 @@ class Music(CTk):
     self.play_btn.wait_variable(self.int_var)
     self.next_btn.configure(command = lambda : self.next_var.set(True))
     self.last_bnt.configure(command=lambda : self.last_var.set(True))
-    curent_mp3 = 0
     while True:
+        curent_mp3 = 0
         pointer = 0 
         for pointer in range(len(self.path)):
+          if curent_mp3 < 0:
+            curent_mp3 +=len(self.path)
+          curent_mp3 +=1 
+          if curent_mp3 >=len(self.path):
+            curent_mp3 = 0
+          pointer = curent_mp3
           mixer.music.load(self.path[pointer])
           mixer.music.play()
           print(pointer)
