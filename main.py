@@ -12,9 +12,10 @@ class Music(tb.Window):
     self.resizable(False , False)
     self.title('boombBox')
     self.iconbitmap(r'icons\boombbox.ico')
-    self.mp3()
     self.flag = True
-  
+    self.volume_status = 10
+    self.mp3()
+    self.bind('<MouseWheel>' , self.set_music_volume) 
   def mp3(self):
     self.main_frame = tb.Frame(self)
     self.main_frame.pack(expand=True , fill='both')
@@ -26,8 +27,8 @@ class Music(tb.Window):
 
     self.volume = tb.Scale(self.main_frame , from_=0 , to=100)
     self.volume.grid(row=4 , column=3 ,sticky='ewns' ,padx=5)
-    self.volume.set(50)
-    mixer.music.set_volume(0.5)
+    self.volume.set(self.volume_status)
+    mixer.music.set_volume(0.1)
     self.volume.configure(command=self.music_volume)
 
     self.play_btn  = tb.Button(self.main_frame , text='Play')
@@ -116,6 +117,20 @@ class Music(tb.Window):
       self.stop_btn.configure(text='||')
 
   def music_volume(self , e):
+    volume = self.volume.get() / 100
+    mixer.music.set_volume(volume)
+
+  def set_music_volume(self , e):
+    if e.delta > 0:
+      self.volume_status +=2
+      if self.volume_status >=100:
+        self.volume_status = 100
+    else:
+      self.volume_status -=2
+      if self.volume_status <= 0 :
+        self.volume_status = 0
+        
+    self.volume.set(self.volume_status)
     volume = self.volume.get() / 100
     mixer.music.set_volume(volume)
 
