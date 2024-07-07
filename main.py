@@ -65,7 +65,7 @@ class Music(tb.Window):
 
       self.int_var.set(0)
       self.img_list.clear()
-      self.path = filedialog.askopenfilename(initialdir=r'D:\fun\musics',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
+      self.path = filedialog.askopenfilename(initialdir=r'/',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
       
       if len(self.path)>0:
           Music._old_img.clear()
