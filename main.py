@@ -8,6 +8,7 @@ from tkinter import filedialog
 mixer.init()
 class Music(tb.Window):
   _old_playlist= ()
+  _old_img = []
   def __init__(self):
     super().__init__(themename='vapor')
     self.geometry('400x250')
@@ -15,8 +16,9 @@ class Music(tb.Window):
     self.title('boombBox')
     self.iconbitmap(r'icons\boombbox.ico')
     self.flag = True
+    self.getbusy = False
     self.volume_status = 10
-    self.list = []
+    self.img_list = []
     self.mp3()
     self.bind('<MouseWheel>' , self.set_music_volume) 
   def mp3(self):
@@ -58,22 +60,29 @@ class Music(tb.Window):
 
   
   def openfile(self):
-      self.path = filedialog.askopenfilename(initialdir=r'D:\fun\musics',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
 
-      if len(self.path)>0:
-        self.int_var.set(0)
-        for musics in self.path:
-          file = eyed3.load(musics)
-          for i in file.tag.images:
-            img = ImageTk.PhotoImage(Image.open(io.BytesIO(i.image_data)).resize(size=(150,150)))
-            self.list.append(img)
-        Music._old_playlist = self.path
-        self.play_music()
+      self.int_var.set(0)
+      self.img_list.clear()
+      self.path = filedialog.askopenfilename(initialdir=r'D:\fun\musics',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
       
-      else:
+      if len(self.path)>0:
+          Music._old_img.clear()
+          for musics in self.path:
+            file = eyed3.load(musics)
+            for i in file.tag.images:
+              img = ImageTk.PhotoImage(Image.open(io.BytesIO(i.image_data)).resize(size=(150,150)))
+              self.img_list.append(img)
+              Music._old_img.append(img)
+          Music._old_playlist = self.path
+          #  passing path to the play_music but in another way
+      
+      elif self.getbusy and len(self.path) < 1:
         self.path = Music._old_playlist
-       
-        
+        for i in Music._old_img:
+          self.img_list.append(i)
+      
+      self.play_music()
+
     
   def play_music(self):
     self.int_var.set(1)
@@ -115,6 +124,7 @@ class Music(tb.Window):
 
 
   def music_list(self , curent_mp3 , pointer):
+    
     for pointer in range(len(self.path)):
       if self.int_var.get() == 0:
         break 
@@ -128,8 +138,10 @@ class Music(tb.Window):
       mixer.music.play()
       music_name = self.path[pointer].split('/')
       self.lbl.configure(text =f'{music_name[-1]}')
-      self.image.configure(image=self.list[pointer])
+      self.image.configure(image=self.img_list[pointer])
       while mixer.music.get_busy():
+          self.getbusy = True
+          
           if self.int_var.get() == 0:
             break
           sleep(0.1)
@@ -149,6 +161,8 @@ class Music(tb.Window):
             mixer.music.play()
             music_name = self.path[pointer].split('/')
             self.lbl.configure(text =f'{music_name[-1]}')
+            self.image.configure(image=self.img_list[pointer])
+
 
           if self.next_var.get():
             self.next_var.set(False)
@@ -160,9 +174,12 @@ class Music(tb.Window):
             mixer.music.play()
             music_name = self.path[pointer].split('/')
             self.lbl.configure(text =f'{music_name[-1]}')
+            self.image.configure(image=self.img_list[pointer])
+
           
           if mixer.music.get_busy() == False :
             self.next_var.set(False)
+            self.getbusy = False
             break
 
 
