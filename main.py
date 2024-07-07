@@ -1,11 +1,13 @@
+import eyed3 , io
+from PIL import Image , ImageTk
 import threading 
+import ttkbootstrap as tb
 from time import sleep
 from pygame import mixer
-from typing import Tuple
-import ttkbootstrap as tb
 from tkinter import filedialog
 mixer.init()
 class Music(tb.Window):
+  _old_playlist= ()
   def __init__(self):
     super().__init__(themename='vapor')
     self.geometry('400x250')
@@ -14,19 +16,25 @@ class Music(tb.Window):
     self.iconbitmap(r'icons\boombbox.ico')
     self.flag = True
     self.volume_status = 10
+    self.list = []
     self.mp3()
     self.bind('<MouseWheel>' , self.set_music_volume) 
   def mp3(self):
     self.main_frame = tb.Frame(self)
     self.main_frame.pack(expand=True , fill='both')
-    self.main_frame.columnconfigure((0,1,2,3,4,5,6,7,8,9) , weight=1 , uniform='a')
-    self.main_frame.rowconfigure((0,1,2,3,4,5,6,7,8,9) , weight=1 , uniform='a')
+    self.main_frame.columnconfigure((0,1,2,3,4,5) , weight=1 , uniform='a')
+    self.main_frame.rowconfigure((0,1,2,3,4,5,6,7,8,9,10) , weight=1 , uniform='a')
 
-    self.lbl = tb.Label(self.main_frame,width=100 ,justify='center')
-    self.lbl.grid(row=6 ,column=0 , columnspan = 4)
+    
+
+    self.lbl = tb.Label(self.main_frame, width=100 , text='?')
+    self.lbl.grid(row=8 , column=0 , columnspan = 4)
+
+    self.image = tb.Label(self.main_frame)
+    self.image.place(x=120 ,y=5)
 
     self.volume = tb.Scale(self.main_frame , from_=0 , to=100)
-    self.volume.grid(row=8 , column=3 ,sticky='ewns' ,padx=5)
+    self.volume.grid(row=6 , column=3 , rowspan=2 ,padx=5 , sticky='nsew')
     self.volume.set(self.volume_status)
     mixer.music.set_volume(0.1)
     self.volume.configure(command=self.music_volume)
@@ -36,7 +44,7 @@ class Music(tb.Window):
     self.brows_bnt = tb.Button(self.main_frame, text='📁')
     self.stop_btn  = tb.Button(self.main_frame , text='||')
     
-    self.brows_bnt.grid(row=7 ,rowspan=2 , column=0)
+    self.brows_bnt.grid(row=6 ,rowspan=2 , column=0 ,sticky='w')
     self.last_bnt.grid(row=9 , column=0 ,rowspan=2,sticky='ew')
     self.stop_btn.grid(row=9 , column=1 ,rowspan=2, columnspan=2 , sticky='ew' ,padx=10)
     self.next_btn.grid(row=9 , column=3 ,rowspan=2, sticky='ew')
@@ -50,12 +58,22 @@ class Music(tb.Window):
 
   
   def openfile(self):
-    self.int_var.set(0)
-    self.path = filedialog.askopenfilename(initialdir=r'D:\fun\musics',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
-    self.play_music()
+      self.path = filedialog.askopenfilename(initialdir=r'D:\fun\musics',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
 
-
-
+      if len(self.path)>0:
+        self.int_var.set(0)
+        for musics in self.path:
+          file = eyed3.load(musics)
+          for i in file.tag.images:
+            img = ImageTk.PhotoImage(Image.open(io.BytesIO(i.image_data)).resize(size=(150,150)))
+            self.list.append(img)
+        Music._old_playlist = self.path
+        self.play_music()
+      
+      else:
+        self.path = Music._old_playlist
+       
+        
     
   def play_music(self):
     self.int_var.set(1)
@@ -67,8 +85,6 @@ class Music(tb.Window):
     if self.int_var.get() == 1:
       th = threading.Thread(target=self.music_list , args=(curent_mp3 , pointer))
       th.start()
-
-
 
 
   def pause_(self):
@@ -112,6 +128,7 @@ class Music(tb.Window):
       mixer.music.play()
       music_name = self.path[pointer].split('/')
       self.lbl.configure(text =f'{music_name[-1]}')
+      self.image.configure(image=self.list[pointer])
       while mixer.music.get_busy():
           if self.int_var.get() == 0:
             break
