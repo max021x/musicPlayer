@@ -1,10 +1,11 @@
 import eyed3 , io
-from PIL import Image , ImageTk
 import threading 
 import ttkbootstrap as tb
+from PIL import Image , ImageTk
 from time import sleep
 from pygame import mixer
 from tkinter import filedialog
+from os import _exit
 mixer.init()
 class Music(tb.Window):
   _old_playlist= ()
@@ -21,6 +22,7 @@ class Music(tb.Window):
     self.img_list = []
     self.mp3()
     self.bind('<MouseWheel>' , self.set_music_volume) 
+    self.bind('<Destroy>' , lambda event : _exit(1))
   def mp3(self):
     self.main_frame = tb.Frame(self)
     self.main_frame.pack(expand=True , fill='both')
