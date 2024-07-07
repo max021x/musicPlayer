@@ -1,17 +1,17 @@
 import eyed3 , io
 import threading 
-import ttkbootstrap as tb
+import tkinter as tb
 from PIL import Image , ImageTk
 from time import sleep
 from pygame import mixer
 from tkinter import filedialog
 from os import _exit
 mixer.init()
-class Music(tb.Window):
+class Music(tb.Tk):
   _old_playlist= ()
   _old_img = []
   def __init__(self):
-    super().__init__(themename='vapor')
+    super().__init__()
     self.geometry('400x250')
     self.resizable(False , False)
     self.title('boombBox')
@@ -38,7 +38,7 @@ class Music(tb.Window):
     self.image.place(x=120 ,y=5)
 
     self.volume = tb.Scale(self.main_frame , from_=0 , to=100)
-    self.volume.grid(row=6 , column=3 , rowspan=2 ,padx=5 , sticky='nsew')
+    self.volume.grid(row=6 , column=3 , rowspan=2 ,padx=5 , sticky='e')
     self.volume.set(self.volume_status)
     mixer.music.set_volume(0.1)
     self.volume.configure(command=self.music_volume)
@@ -65,7 +65,7 @@ class Music(tb.Window):
 
       self.int_var.set(0)
       self.img_list.clear()
-      self.path = filedialog.askopenfilename(initialdir=r'D:\fun\musics',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
+      self.path = filedialog.askopenfilename(initialdir=r'/',filetypes=[('mp3 files' , "*.mp3")],multiple=1)
       
       if len(self.path)>0:
           Music._old_img.clear()
