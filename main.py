@@ -19,35 +19,32 @@ class Music(tb.Window):
   def mp3(self):
     self.main_frame = tb.Frame(self)
     self.main_frame.pack(expand=True , fill='both')
-    self.main_frame.columnconfigure((0,1,2,3,4) , weight=1 , uniform='a')
-    self.main_frame.rowconfigure((0,1,2,3,4,5) , weight=1 , uniform='a')
+    self.main_frame.columnconfigure((0,1,2,3,4,5,6,7,8,9) , weight=1 , uniform='a')
+    self.main_frame.rowconfigure((0,1,2,3,4,5,6,7,8,9) , weight=1 , uniform='a')
 
-    self.lbl = tb.Label(self.main_frame ,width=100)
-    self.lbl.grid(row=0 ,column=0 , columnspan = 4)
+    self.lbl = tb.Label(self.main_frame,width=100 ,justify='center')
+    self.lbl.grid(row=6 ,column=0 , columnspan = 4)
 
     self.volume = tb.Scale(self.main_frame , from_=0 , to=100)
-    self.volume.grid(row=4 , column=3 ,sticky='ewns' ,padx=5)
+    self.volume.grid(row=8 , column=3 ,sticky='ewns' ,padx=5)
     self.volume.set(self.volume_status)
     mixer.music.set_volume(0.1)
     self.volume.configure(command=self.music_volume)
 
-    self.play_btn  = tb.Button(self.main_frame , text='Play')
     self.next_btn  = tb.Button(self.main_frame , text='Next')
     self.last_bnt  = tb.Button(self.main_frame , text='Last')
     self.brows_bnt = tb.Button(self.main_frame, text='📁')
     self.stop_btn  = tb.Button(self.main_frame , text='||')
     
-    self.brows_bnt.grid(row=4 , column=0)
-    self.last_bnt.grid(row=5 , column=0 ,sticky='ew')
-    self.stop_btn.grid(row=5 , column=1 , columnspan=2 , sticky='ew' ,padx=10)
-    self.next_btn.grid(row=5 , column=3 , sticky='ew')
-    self.play_btn.grid(row=4 , column=1 , sticky='ew' ,columnspan=2 , padx=10)
+    self.brows_bnt.grid(row=7 ,rowspan=2 , column=0)
+    self.last_bnt.grid(row=9 , column=0 ,rowspan=2,sticky='ew')
+    self.stop_btn.grid(row=9 , column=1 ,rowspan=2, columnspan=2 , sticky='ew' ,padx=10)
+    self.next_btn.grid(row=9 , column=3 ,rowspan=2, sticky='ew')
 
     self.int_var =  tb.IntVar()
     self.next_var = tb.BooleanVar()
     self.last_var = tb.BooleanVar()
     self.brows_bnt.configure(command=self.openfile)
-    self.play_btn.configure(command= lambda : self.int_var.set(1))
     self.stop_btn.configure(command=self.pause_)
 
 
@@ -65,15 +62,12 @@ class Music(tb.Window):
     self.next_btn.configure(command = lambda : self.next_var.set(True))
     self.last_bnt.configure(command = lambda : self.last_var.set(True))
     self.flag = True
-    while True:
-        curent_mp3 = 0
-        pointer = 0
-        if self.int_var.get() == 1:
-          th = threading.Thread(target=self.music_list , args=(curent_mp3 , pointer))
-          th.start()
-          break
-        else:
-          break
+    curent_mp3 = 0
+    pointer = 0
+    if self.int_var.get() == 1:
+      th = threading.Thread(target=self.music_list , args=(curent_mp3 , pointer))
+      th.start()
+
 
 
 
@@ -121,7 +115,7 @@ class Music(tb.Window):
       while mixer.music.get_busy():
           if self.int_var.get() == 0:
             break
-          sleep(1)
+          sleep(0.1)
           while self.flag == False:
               mixer.music.pause()
 
